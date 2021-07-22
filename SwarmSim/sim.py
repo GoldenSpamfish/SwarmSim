@@ -11,13 +11,15 @@ class SwarmSim:
         self.screen = pygame.display.set_mode((2000, 1000))
         self.swarm = []
         self.clock = pygame.time.Clock()
+        self.background = load_sprite("Desert")
 
-        for i in range(24):
-            self.swarm.append(swarmMember(
-                # position tuple,         sprite,         velocity vector list, alive bool, color int
-                (75*(i+1), 200),      load_sprite("Seabat"),        [1, 1 + 0.01*i],           True,       0,
-                # battery int,   hp,     ideal distance, sight range,    sees target bool, attacking bool, team num
-                2000,           100,           100,         200,             False,            False,        0))
+        for x in range(12):
+            for y in range(3):
+                self.swarm.append(swarmMember(
+                    # position tuple,     sprite,      velocity int,  angle int   alive bool, color int
+                    (100 * x + 200, 150 * y + 100), load_sprite("Seabat"), 1, 1 * x, True, 0,
+                    # battery int,   hp,     ideal distance, sight range,    sees target bool, attacking bool, team num
+                    2000, 100, 100, 200, False, False, 0))
 
     def mainLoop(self):
         running = True
@@ -38,15 +40,14 @@ class SwarmSim:
     def _processGameLogic(self):
         self.visData.clear()
         for data in self.swarm:
-            self.visData.append([data.posCord, data.velocity, data.color])
-
+            self.visData.append([data.posCord, data.velocity, data.angle, data.color])
 
         for i in self.swarm:
             i.computePos(self.visData)
             i.move()
 
     def _draw(self):
-        self.screen.fill((255, 217, 133))
+        self.screen.blit(self.background, (0, 0))
         for i in self.swarm:
             i.draw(self.screen)
 

@@ -3,11 +3,36 @@ import math
 from pygame.math import Vector2
 
 
+def diagLength(x, y):
+    return math.sqrt(math.pow(x, 2) + math.pow(y, 2))
+
+
+def pointDist(x1, y1, x2, y2):
+    return math.sqrt(
+        (math.pow(x1 - y1, 2)) + (math.pow(x2 - y2, 2)))
+
+
+def tanAngle(x, y):
+    if x != 0 and y != 0:
+        return math.degrees(
+            math.atan(x / y))
+    else:
+        return 0
+
+
+def vectorComponents(magnitude, angle):
+    radAngle = math.radians(angle)
+    return [math.sin(radAngle) * magnitude, math.cos(radAngle) * magnitude]
+
+
 class swarmMember(pygame.sprite.Sprite):
-    def __init__(self, position, sprite, velocity, alive, color, battery, damage, distance,
+    def __init__(self, position, sprite, velocityMagnitude, angle, alive, color, battery, damage, distance,
                  sightRange, seesTarget, attacking, team):
         super(swarmMember, self).__init__()
-        self.velocity = velocity
+        self.closestDatum = []
+        self.velocityMagnitude = velocityMagnitude
+        self.angle = angle
+        self.velocity = vectorComponents(self.velocityMagnitude, self.angle)
         self.sprite = sprite
         self.baseSprite = sprite
         self.team = team
@@ -22,13 +47,13 @@ class swarmMember(pygame.sprite.Sprite):
         self.posCord = position
         self.position = Vector2(position)
         self.radius = 64
-        self.turnRate = 0.001
-        self.angle = math.degrees(
-            math.atan(self.velocity[0] / self.velocity[1]) if self.velocity[0] != 0 and self.velocity[1] != 0 else 0)
+        self.turnRate = 1
 
     def draw(self, surface):
         blit_position = self.position - Vector2(self.radius)
+
         self.sprite = pygame.transform.rotate(self.baseSprite, self.angle)
+
         surface.blit(self.sprite, blit_position)
 
     def move(self):
@@ -37,30 +62,45 @@ class swarmMember(pygame.sprite.Sprite):
 
     def computePos(self, visData):
 
-        for datum in visData:
-            self.angle = math.degrees(math.atan(self.velocity[0] / self.velocity[1]) if self.velocity[0] != 0 and self.velocity[1] != 0 else 0)
-            datumAngle = math.degrees(math.atan(datum[1][0] / datum[1][1]) if datum[1][0] != 0 and datum[1][1] != 0 else 0)
-            angleDiff= self.angle-datumAngle
-            diagDist = math.sqrt(
-                (math.pow(datum[0][0] - datum[0][1], 2)) + (math.pow(self.posCord[0] - self.posCord[1], 2)))
-            velocityDiffX = datum[1][0] - self.velocity[0]
-            velocityDiffY = datum[1][1] - self.velocity[1]
-            # print(velocityDiffX)
-            # print(velocityDiffY)
-            # print(self.angle)
+        # Loop to find closest UAV
+        lowestIndex = 0
+        lowestVal = float("inf")
 
-            if datum[0] != self.position and not diagDist > self.sightRange:
-                if angleDiff != 0:
-                    print("adjusting...")
-                    if velocityDiffX > 0:
-                         self.velocity[0] -= self.turnRate
-                    elif velocityDiffX < 0:
-                         self.velocity[0] += self.turnRate
+        for i in range(len(visData)):
+            diagDist = pointDist(visData[i][0][0], visData[i][0][1], self.posCord[0], self.posCord[1])
+            if diagDist < lowestVal:
+                lowestVal = diagDist
+                lowestIndex = i
+        datum = visData[lowestIndex]
 
-                    if velocityDiffY > 0:
-                        self.velocity[1] -= self.turnRate
-                    elif velocityDiffY < 0:
-                        self.velocity[1] += self.turnRate
-                else:
-                    print("angle match")
+        datumAngle = datum[2]
+        angleDiff = self.angle - datumAngle
+        halfwayAngle = angleDiff / 2 + self.angle
+        diagDist = pointDist(datum[0][0], datum[0][1], self.posCord[0], self.posCord[1])
+        velocityDiffX = datum[1][0] - self.velocity[0]
+        velocityDiffY = datum[1][1] - self.velocity[1]
 
+        # print(velocityDiffX)
+        # print(velocityDiffY)
+        # print(self.angle)
+
+        if datum[0] != self.position and not diagDist > self.sightRange:
+            self.velocity = vectorComponents(self.velocityMagnitude, self.angle)
+            if self.angle != halfwayAngle:
+                if self.angle < halfwayAngle:
+                    self.angle += self.turnRate
+                elif self.angle > halfwayAngle:
+                    self.angle -= self.turnRate
+
+        #     # print("adjusting...")
+        #     if velocityDiffX > 0:
+        #         self.velocity[0] -= self.turnRate
+        #     elif velocityDiffX < 0:
+        #         self.velocity[0] += self.turnRate
+        #
+        #     if velocityDiffY > 0:
+        #         self.velocity[1] -= self.turnRate
+        #     elif velocityDiffY < 0:
+        #         self.velocity[1] += self.turnRate
+        # else:
+        #     print("angle match")
