@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from utils import load_sprite
 from member import swarmMember
@@ -17,9 +18,9 @@ class SwarmSim:
             for y in range(3):
                 self.swarm.append(swarmMember(
                     # position tuple,     sprite,      velocity int,  angle int   alive bool, color int
-                    (100 * x + 200, 150 * y + 100), load_sprite("Seabat"), 1, 1 * x, True, 0,
+                    (50 * x + 400, 50 * y + 50), load_sprite("Seabat"), 1, random.randrange(-15, 15), True, 0,
                     # battery int,   hp,     ideal distance, sight range,    sees target bool, attacking bool, team num
-                    2000, 100, 100, 200, False, False, 0))
+                    2000,           100,          100,            200,             False,            False,        0))
 
     def mainLoop(self):
         running = True

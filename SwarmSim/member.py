@@ -34,7 +34,7 @@ class swarmMember(pygame.sprite.Sprite):
         self.angle = angle
         self.velocity = vectorComponents(self.velocityMagnitude, self.angle)
         self.sprite = sprite
-        self.baseSprite = sprite
+        self.baseSprite = pygame.transform.scale(self.sprite, (30, 12))
         self.team = team
         self.attacking = attacking
         self.seesTarget = seesTarget
@@ -75,7 +75,7 @@ class swarmMember(pygame.sprite.Sprite):
 
         datumAngle = datum[2]
         angleDiff = self.angle - datumAngle
-        halfwayAngle = angleDiff / 2 + self.angle
+        halfwayAngle = (self.angle + datumAngle) / 2
         diagDist = pointDist(datum[0][0], datum[0][1], self.posCord[0], self.posCord[1])
         velocityDiffX = datum[1][0] - self.velocity[0]
         velocityDiffY = datum[1][1] - self.velocity[1]
