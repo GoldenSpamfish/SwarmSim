@@ -47,7 +47,10 @@ class swarmMember(pygame.sprite.Sprite):
         self.posCord = position
         self.position = Vector2(position)
         self.radius = 64
-        self.turnRate = 1
+        self.turnRate = 3
+        self.speedRate = 0.01
+        self.minVel= velocityMagnitude/3
+        self.maxVel= velocityMagnitude*2
 
     def draw(self, surface):
         blit_position = self.position - Vector2(self.radius)
@@ -77,30 +80,32 @@ class swarmMember(pygame.sprite.Sprite):
         angleDiff = self.angle - datumAngle
         halfwayAngle = (self.angle + datumAngle) / 2
         diagDist = pointDist(datum[0][0], datum[0][1], self.posCord[0], self.posCord[1])
+        diagAngle = ()
         velocityDiffX = datum[1][0] - self.velocity[0]
         velocityDiffY = datum[1][1] - self.velocity[1]
+        posDiffX = self.position[0] - datum[0][0]
+        posDiffY = self.position[1] - datum[0][1]
+
 
         # print(velocityDiffX)
         # print(velocityDiffY)
         # print(self.angle)
 
         if datum[0] != self.position and not diagDist > self.sightRange:
-            self.velocity = vectorComponents(self.velocityMagnitude, self.angle)
+            if diagDist != self.distance:
+                if posDiffY > 0 and (self.velocityMagnitude + self.speedRate) < self.maxVel:
+                    self.velocityMagnitude += self.speedRate
+                elif posDiffY < 0 and (self.velocityMagnitude - self.speedRate) > self.maxVel:
+                    self.velocityMagnitude -= self.speedRate
+
             if self.angle != halfwayAngle:
                 if self.angle < halfwayAngle:
                     self.angle += self.turnRate
                 elif self.angle > halfwayAngle:
                     self.angle -= self.turnRate
 
-        #     # print("adjusting...")
-        #     if velocityDiffX > 0:
-        #         self.velocity[0] -= self.turnRate
-        #     elif velocityDiffX < 0:
-        #         self.velocity[0] += self.turnRate
-        #
-        #     if velocityDiffY > 0:
-        #         self.velocity[1] -= self.turnRate
-        #     elif velocityDiffY < 0:
-        #         self.velocity[1] += self.turnRate
-        # else:
-        #     print("angle match")
+
+
+
+            ##### ACTION #####
+            self.velocity = vectorComponents(self.velocityMagnitude, self.angle)

@@ -9,7 +9,7 @@ class SwarmSim:
     def __init__(self):
         self.visData = []
         self._initPygame()
-        self.screen = pygame.display.set_mode((2000, 1000))
+        self.screen = pygame.display.set_mode((1920, 1080))
         self.swarm = []
         self.clock = pygame.time.Clock()
         self.background = load_sprite("Desert")
@@ -17,8 +17,8 @@ class SwarmSim:
         for x in range(12):
             for y in range(3):
                 self.swarm.append(swarmMember(
-                    # position tuple,     sprite,      velocity int,  angle int   alive bool, color int
-                    (50 * x + 400, 50 * y + 50), load_sprite("Seabat"), 1, random.randrange(-15, 15), True, 0,
+                    # position tuple,                 sprite,      velocity int,  angle int             alive bool, color int
+                    (50 * x + 400, 50 * y + 50), load_sprite("Seabat"), 0.3,      random.randrange(-15, 15), True,       0,
                     # battery int,   hp,     ideal distance, sight range,    sees target bool, attacking bool, team num
                     2000,           100,          100,            200,             False,            False,        0))
 
